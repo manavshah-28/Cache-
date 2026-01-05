@@ -1,6 +1,6 @@
 # do run.do
 # QuestaSim-64 vlog 2024.1 Compiler 2024.02 Feb  1 2024
-# Start time: 07:16:28 on Jan 05,2026
+# Start time: 11:05:07 on Jan 05,2026
 # vlog -sv -work work -f ../sim/dut.f 
 # -- Compiling package cache_pkg
 # -- Compiling package l1d_sv_unit
@@ -11,10 +11,10 @@
 # 
 # Top level modules:
 # 	l1d_tb
-# End time: 07:16:29 on Jan 05,2026, Elapsed time: 0:00:01
+# End time: 11:05:07 on Jan 05,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim work.l1d_tb 
-# Start time: 07:16:29 on Jan 05,2026
+# Start time: 11:05:07 on Jan 05,2026
 # ** Note: (vsim-3812) Design is being optimized...
 # Support of the MGLS_LICENSE_FILE and LM_LICENSE_FILE licensing environment variables will be discontinued starting with the 2025.1 release. Please update to using the SALT_LICENSE_SERVER variable.
 # Please contact Siemens EDA Customer Support (https://support.sw.siemens.com/) for assistance.
@@ -37,15 +37,19 @@
 # Loading work.l1d_sv_unit(fast)
 # Loading work.l1d_tb_sv_unit(fast)
 # Loading work.l1d_tb(fast)
-# Cache size = 32768
-# Cache ways = 4
-# Line Size = 32
-# Number of Cache lines =  1024
-# Sets = 256
-# offset bits = 5
-# index bits = 8
-# tag bits = 19
-# ** Note: $finish    : ../tests/l1d_tb.sv(43)
+# ________________|$ CACHE INFO $|_______________
+#  
+# Cache size  = 32768
+# Cache ways  = 4
+# Line size   = 32
+# Data Bits   = 256
+# Cache lines = 1024
+# Sets        = 256
+# Offset      = 5
+# Index       = 8
+# Tag         = 19
+# _______________________________________________
+# ** Note: $finish    : ../tests/l1d_tb.sv(37)
 #    Time: 10 ns  Iteration: 0  Instance: /l1d_tb
-# End time: 07:16:30 on Jan 05,2026, Elapsed time: 0:00:01
+# End time: 11:05:08 on Jan 05,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
