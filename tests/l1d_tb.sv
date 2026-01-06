@@ -61,6 +61,15 @@ logic l1_cpu_valid;
 logic l1_cpu_stall;
 logic [31:0] l1_cpu_rdata;
 
+/*============= L1-> Memory INTERFACE =============*/
+  logic l1_mem_valid;
+  logic l1_mem_store;   // 0 : load 1 : store
+  logic [31:0] l1_mem_addr;    // address 
+  logic [31:0] l1_mem_wdata;   // data to write
+
+  logic [31:0] mem_l1_rdata;
+  logic mem_l1_valid;
+  
 logic resp_valid;
 // DUT instantiation
 l1d datacache(.*);

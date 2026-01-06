@@ -18,10 +18,18 @@ module l1d(
     // L1D -> CPU
     output logic l1_cpu_valid,
     output logic [31:0] l1_cpu_rdata,
-    output logic l1_cpu_stall
+    output logic l1_cpu_stall,
 
     /*============= L1->L2 INTERFACE =============*/
 
+    /*============= L1-> Memory INTERFACE =============*/
+    output logic l1_mem_valid,
+    output logic l1_mem_store,   // 0 : load 1 : store
+    output logic [31:0] l1_mem_addr,    // address 
+    output logic [31:0] l1_mem_wdata,   // data to write
+
+    input logic [31:0] mem_l1_rdata,
+    input logic mem_l1_valid
 );
     
 // L1 CACHE ARRAYS
