@@ -1,23 +1,3 @@
-# do run.do
-# QuestaSim-64 vlog 2024.1 Compiler 2024.02 Feb  1 2024
-# Start time: 04:19:57 on Jan 06,2026
-# vlog -sv -work work -f ../sim/dut.f 
-# -- Compiling package cache_pkg
-# -- Compiling package l1d_sv_unit
-# -- Importing package cache_pkg
-# -- Compiling module l1d
-# -- Compiling package l1d_tb_sv_unit
-# -- Compiling module l1d_tb
-# 
-# Top level modules:
-# 	l1d_tb
-# End time: 04:19:57 on Jan 06,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# vsim work.l1d_tb 
-# Start time: 04:19:57 on Jan 06,2026
-# ** Note: (vsim-3812) Design is being optimized...
-# Support of the MGLS_LICENSE_FILE and LM_LICENSE_FILE licensing environment variables will be discontinued starting with the 2025.1 release. Please update to using the SALT_LICENSE_SERVER variable.
-# Please contact Siemens EDA Customer Support (https://support.sw.siemens.com/) for assistance.
 # //  Questa Sim-64
 # //  Version 2024.1 win64 Feb  1 2024
 # //
@@ -32,11 +12,52 @@
 # // of the Customer's facilities without the express written permission of SISW,
 # // and may not be used in any way not expressly authorized by SISW.
 # //
+# vsim -voptargs="+acc" work.l1d_tb 
+# Start time: 08:18:25 on Jan 06,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Warning: (vopt-10587) Some optimizations are turned off because the +acc switch is in effect. This will cause your simulation to run slowly. Please use -access/-debug to maintain needed visibility.
+# Support of the MGLS_LICENSE_FILE and LM_LICENSE_FILE licensing environment variables will be discontinued starting with the 2025.1 release. Please update to using the SALT_LICENSE_SERVER variable.
+# Please contact Siemens EDA Customer Support (https://support.sw.siemens.com/) for assistance.
+# ** Note: (vopt-143) Recognized 1 FSM in module "l1d(fast)".
+# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
 # Loading sv_std.std
 # Loading work.cache_pkg(fast)
-# Loading work.l1d_sv_unit(fast)
 # Loading work.l1d_tb_sv_unit(fast)
 # Loading work.l1d_tb(fast)
+# Loading work.l1d_sv_unit(fast)
+# Loading work.l1d(fast)
+add wave -position insertpoint  \
+sim:/l1d_tb/datacache/clk \
+sim:/l1d_tb/datacache/rst_n \
+sim:/l1d_tb/datacache/cpu_l1_valid \
+sim:/l1d_tb/datacache/cpu_l1_store \
+sim:/l1d_tb/datacache/cpu_l1_addr \
+sim:/l1d_tb/datacache/cpu_l1_wdata \
+sim:/l1d_tb/datacache/cpu_l1_wstrb \
+sim:/l1d_tb/datacache/l1_cpu_valid \
+sim:/l1d_tb/datacache/l1_cpu_rdata \
+sim:/l1d_tb/datacache/l1_cpu_stall \
+sim:/l1d_tb/datacache/tag_array \
+sim:/l1d_tb/datacache/data_array \
+sim:/l1d_tb/datacache/dirty_array \
+sim:/l1d_tb/datacache/valid_array \
+sim:/l1d_tb/datacache/offset \
+sim:/l1d_tb/datacache/index \
+sim:/l1d_tb/datacache/tag \
+sim:/l1d_tb/datacache/way_hit \
+sim:/l1d_tb/datacache/hit \
+sim:/l1d_tb/datacache/hit_way \
+sim:/l1d_tb/datacache/line_data \
+sim:/l1d_tb/datacache/word_data \
+sim:/l1d_tb/datacache/lru_pos \
+sim:/l1d_tb/datacache/victim_way \
+sim:/l1d_tb/datacache/victim_dirty \
+sim:/l1d_tb/datacache/victim_valid \
+sim:/l1d_tb/datacache/state \
+sim:/l1d_tb/datacache/next_state \
+sim:/l1d_tb/datacache/l2_wb_done \
+sim:/l1d_tb/datacache/l2_refill_done
+run -all
 # ________________|$ CACHE INFO $|_______________
 #  
 # Cache size  = 32768
@@ -49,7 +70,29 @@
 # Index       = 8
 # Tag         = 19
 # _______________________________________________
-# ** Note: $finish    : ../tests/l1d_tb.sv(37)
-#    Time: 10 ns  Iteration: 0  Instance: /l1d_tb
-# End time: 04:19:59 on Jan 06,2026, Elapsed time: 0:00:02
-# Errors: 0, Warnings: 0
+# valid=1 store=1 addr=af3561f8 wstrb=1100 wdata=a2801969
+# 235 Timeout : Response not received
+# valid=1 store=1 addr=ee5e9034 wstrb=1111 wdata=463b72c3
+# 445 Timeout : Response not received
+# valid=1 store=1 addr=9d8bdd84 wstrb=1100 wdata=686a3c51
+# 655 Timeout : Response not received
+# valid=1 store=1 addr=755ad5d0 wstrb=1000 wdata=1bc4d5af
+# 865 Timeout : Response not received
+# valid=1 store=1 addr=25089a30 wstrb=1100 wdata=485370f4
+# 1075 Timeout : Response not received
+# valid=0 store=0 addr=f4316c70 wstrb=0000 wdata=00000000
+# 1285 Timeout : Response not received
+# valid=1 store=1 addr=dfa54684 wstrb=1100 wdata=decf5289
+# 1495 Timeout : Response not received
+# valid=1 store=1 addr=a191b50c wstrb=0010 wdata=e4aa694b
+# 1705 Timeout : Response not received
+# valid=1 store=1 addr=b523d024 wstrb=0011 wdata=020b5e0e
+# 1915 Timeout : Response not received
+# valid=0 store=1 addr=0843f9ac wstrb=0100 wdata=7a006361
+# 2125 Timeout : Response not received
+# ** Note: $finish    : ../tests/l1d_tb.sv(118)
+#    Time: 2125 ns  Iteration: 1  Instance: /l1d_tb
+# 1
+# Break in Module l1d_tb at ../tests/l1d_tb.sv line 118
+# End time: 08:20:27 on Jan 06,2026, Elapsed time: 0:02:02
+# Errors: 0, Warnings: 1

@@ -10,7 +10,7 @@ module l1d(
 
     // CPU -> L1D
     input logic cpu_l1_valid,             // CPU wants to access memory
-    input logic pcu_l1_store,             // 0 = load, 1 = store
+    input logic cpu_l1_store,             // 0 = load, 1 = store
     input logic [31:0] cpu_l1_addr,       //  
     input logic [31:0] cpu_l1_wdata,
     input logic [3:0] cpu_l1_wstrb,
@@ -143,6 +143,11 @@ end
 
 logic l2_wb_done; // has to come from the L2 cache
 logic l2_refill_done;
+
+initial begin
+l2_wb_done <= 1;
+l2_refill_done <= 1;
+end
 
 // FSM state updates 
 always_comb begin
