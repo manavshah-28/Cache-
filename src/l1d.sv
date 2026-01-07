@@ -18,26 +18,29 @@ module l1d(
     // L1D -> CPU
     output logic l1_cpu_valid,
     output logic [31:0] l1_cpu_rdata,
-    output logic l1_cpu_stall,
+    output logic l1_cpu_stall
 
     /*============= L1->L2 INTERFACE =============*/
-
-    /*============= L1-> Memory INTERFACE =============*/
-    output logic l1_mem_valid,
-    output logic l1_mem_store,   // 0 : load 1 : store
-    output logic [31:0] l1_mem_addr,    // address 
-    output logic [31:0] l1_mem_wdata,   // data to write
-
-    input logic [31:0] mem_l1_rdata,
-    input logic mem_l1_valid
+   
 );
-    
-// L1 CACHE ARRAYS
+
+ /*============= L1-> Memory INTERFACE =============*/
+logic l1_mem_valid;
+logic l1_mem_store;   // 0 : load 1 : store
+logic [31:0] l1_mem_addr;    // address 
+logic [31:0] l1_mem_wdata;   // data to write
+
+logic [31:0] mem_l1_rdata;
+logic mem_l1_valid;    
+
+// memory instantiation
+memory main_mem(.*);
+
+ /*============= L1 Cache Arrays =============*/
 logic [L1_TAG-1:0] tag_array[L1_SETS][L1_WAYS]; 
 logic [L1_DATABITS-1:0] data_array[L1_SETS][L1_WAYS];
 logic dirty_array[L1_SETS][L1_WAYS];
 logic valid_array[L1_SETS][L1_WAYS];
-
 
 /* ================= ADDRESS DECODE ================= */
 logic [L1_OFFSET-1:0] offset;
@@ -50,12 +53,12 @@ assign tag    = cpu_l1_addr[L1_OFFSET+ L1_INDEX +: L1_TAG];
 
 /* ==================== HIT LOGIC ==================== */
 
-logic [L1_WAYS-1:0] way_hit; // one bit hit flag per cache way
-logic hit; // Global Hit Flag if any way hits than this will be hit. 
-logic [$clog2(L1_WAYS)-1:0] hit_way; // Binary index of the way that hit; Width = number of bits needed to encode WAYS // 2 bits for 4 way
+logic [L1_WAYS-1:0] way_hit;         // one bit hit flag per cache way
+logic hit;                           // Global Hit Flag if any way hits than this will be hit. 
+logic [$clog2(L1_WAYS)-1:0] hit_way; // binary index of the way that hit; Width = number of bits needed to encode WAYS // 2 bits for 4 way
 
+// $@1 There is an assumption that only one way will hit
 always_comb begin
-    // for loop to go through all ways
     for(int w = 0; w < L1_WAYS; w ++)begin
         way_hit[w] = valid_array[index][w] && (tag_array[index][w] == tag); // valid and tag check to see if its a hit
     end
@@ -75,25 +78,50 @@ end
 logic [255:0] line_data;
 logic [31:0]  word_data;
 
+// $@1
 assign line_data = data_array[index][hit_way]; // 32 bytes or 256 bits or 8 words
 assign word_data = line_data[(offset*32)+: 32];
 
 /* ================= TRUE LRU ================= */
-/* LRU tracks the least recently used WAY in a particular SET.
-Since I have 4 ways I need 2 bits per way to track positions of every way in every set.
+/* 
+LRU tracks the least recently used WAY in a particular SET.
+4 ways, so need 2 bits per way to track LRU.
 */
 
-logic [1:0] lru_pos [L1_SETS][L1_WAYS];
+logic [1:0] lru_pos [L1_SETS][L1_WAYS]; // 256 sets and 4 ways
 
-// LRU Update logic on HIT
+/* LRU updation logic example
+___________________
+   ways->   0 1 2 3
+___________________
+set 0   :   0 1 2 3 | (0 : MRU  3 : LRU)
+set 1   :   0 1 2 3
+.
+.
+set 255 :   0 1 2 3 
+___________________
+
+lets say we had a hit on set 1, way 2
+___________________
+   ways->   0 1 2 3
+___________________
+set 0   :   0 1 2 3 | (0 : MRU  3 : LRU)
+set 1   :   1 2 0 3
+.
+.
+set 255 :   0 1 2 3 
+___________________
+*/
+
+/* ================ LRU update logic ================= */
 always_ff @(posedge clk or negedge rst_n) begin
     
     // initialize lru_pos array
     if(!rst_n)begin
         for(int s = 0; s < L1_SETS; s ++)begin
-        for(int w = 0; w < L1_WAYS; w ++)begin
-        lru_pos[s][w] = w; // way 0 is MRU, Way 3 is LRU initially
-        end
+            for(int w = 0; w < L1_WAYS; w ++)begin
+                lru_pos[s][w] = w; // (0 : MRU  3 : LRU)
+            end
         end
     end
     else begin
@@ -113,13 +141,13 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
-// Victim Selection
+/* ================ Victim Selection ================= */
 logic [$clog2(L1_WAYS)-1:0] victim_way;
 
 always_comb begin
     victim_way = '0;
     for (int w = 0; w < L1_WAYS; w++) begin
-        if (lru_pos[index][w] == L1_WAYS-1)
+        if (lru_pos[index][w] == L1_WAYS-1) // whenever lru_pos array for a specific index is 3, that is the LRU way. (0 : MRU  3 : LRU)
             victim_way = w;
     end
 end
@@ -135,7 +163,7 @@ typedef enum logic [2:0] {
     IDLE,                   // wait for CPU request
     LOOKUP,                 // check hit/miss
     WRITEBACK,              // evict ditry line
-    REFILL,                 // fetch new line form L2
+    REFILL,                 // fetch new line form main mem
     RESP                    // respond to CPU
 }cache_state;
 
@@ -147,14 +175,6 @@ always_ff @(posedge clk or negedge rst_n) begin
         state <= IDLE;
     else
         state <= next_state;
-end
-
-logic l2_wb_done; // has to come from the L2 cache
-logic l2_refill_done;
-
-initial begin
-l2_wb_done <= 1;
-l2_refill_done <= 1;
 end
 
 // FSM state updates 
@@ -170,19 +190,19 @@ always_comb begin
         LOOKUP: begin
             if (hit)
                 next_state = RESP;
+            // miss but there is a valid and dirty victim    
             else if (victim_valid && victim_dirty)
-                next_state = WRITEBACK;
+                next_state = WRITEBACK; // evict that dirty victim back to main memory
             else
+                next_state = REFILL; // miss and not valid dirty victim, bring in the new data from mem directly
+
+        end
+
+        WRITEBACK: begin // evict dirty line back to main mem
                 next_state = REFILL;
         end
 
-        WRITEBACK: begin
-            if (l2_wb_done)
-                next_state = REFILL;
-        end
-
-        REFILL: begin
-            if (l2_refill_done)
+        REFILL: begin    // get the required data from main mem
                 next_state = RESP;
         end
 

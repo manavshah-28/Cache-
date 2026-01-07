@@ -15,7 +15,7 @@ vlog -sv -work work -f ../sim/dut.f
 # ----------------------------------
 # Simulate
 # ----------------------------------
-vsim work.memory_tb
+vsim work.l1d_tb
 
 run -all
 quit
