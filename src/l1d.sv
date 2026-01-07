@@ -158,7 +158,7 @@ logic victim_valid;
 assign victim_dirty = dirty_array[index][victim_way];
 assign victim_valid = valid_array[index][victim_way];
 
-// MISS HANDLE FSM
+/* ================ MISS HANDLE FSM ================= */
 typedef enum logic [2:0] {
     IDLE,                   // wait for CPU request
     LOOKUP,                 // check hit/miss
@@ -169,7 +169,7 @@ typedef enum logic [2:0] {
 
 cache_state state, next_state;
 
-// FSM update logic
+/* ================ FSM update logic ================= */
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n)
         state <= IDLE;
@@ -177,33 +177,50 @@ always_ff @(posedge clk or negedge rst_n) begin
         state <= next_state;
 end
 
-// FSM state updates 
 always_comb begin
     next_state = state;
 
     case (state)
+        // wait for the valid request from CPU
         IDLE: begin
             if (cpu_l1_valid)
                 next_state = LOOKUP;
         end
 
+        // check HIT/MISS
         LOOKUP: begin
+
+            // HIT
             if (hit)
                 next_state = RESP;
-            // miss but there is a valid and dirty victim    
+
+            // MISS
             else if (victim_valid && victim_dirty)
                 next_state = WRITEBACK; // evict that dirty victim back to main memory
             else
-                next_state = REFILL; // miss and not valid dirty victim, bring in the new data from mem directly
+                next_state = REFILL;    // miss and not valid dirty victim, bring in the new data from mem directly
 
         end
 
         WRITEBACK: begin // evict dirty line back to main mem
-                next_state = REFILL;
+            //
+            l1_mem_valid = 1;
+            l1_mem_store = 1;
+            l1_mem_addr  = cpu_l1_addr;     
+            l1_mem_wdata = cpu_l1_wdata;
+
+            next_state = REFILL;
         end
 
         REFILL: begin    // get the required data from main mem
-                next_state = RESP;
+            l1_mem_valid = 0;
+
+            l1_mem_store = 0; // load mode on
+
+            // Since memory is word aligned, from word 0 to word 65,535 
+            // and each cache block is made up of 8 blocks, on a cache miss
+            // I need to fill in 8 words sequentially from the memory.                     
+            next_state = RESP;
         end
 
         RESP: begin
